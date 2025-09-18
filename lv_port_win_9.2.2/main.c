@@ -14,6 +14,7 @@
 #include "lvgl/demos/lv_demos.h"
 
 #include "lv_flex_layout_exp.h"
+#include "lv_slider_exp.h"
 
 /*********************
  *      DEFINES
@@ -60,7 +61,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLi
 
     // Flex Layout Demo Examples
     // flex_layout_exp_1();
-    flex_layout_exp_2();
+    // flex_layout_exp_2();
+
+    // Slider Experiments with Flex Layout
+    slider_exp_1();
 
     while(1) {
         /* Periodically call the lv_task handler.
