@@ -40,9 +40,14 @@ void slider_exp_1( void )
 
   // slider value label
   sld_value = lv_label_create( sld_container );
-  lv_obj_set_size( sld_value, LV_PCT(20), LV_SIZE_CONTENT );
+  lv_obj_set_size( sld_value, LV_PCT(30), LV_SIZE_CONTENT );
   lv_label_set_text( sld_value, "40%" );
   lv_obj_set_style_text_font( sld_value, &lv_font_montserrat_18, 0 );
+
+  // lv_obj_set_style_pad_row( sld_dsc, 10, 0 );
+  // lv_obj_set_style_pad_left( sld, 10, 0 );
+  lv_obj_set_style_pad_left( sld_value, 10, 0 );
+  // lv_obj_set_style_pad_right( sld_value, 5, 0 );
 }
 
 // Private Function Definitions
