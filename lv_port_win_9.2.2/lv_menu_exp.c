@@ -1,8 +1,20 @@
 #include "lv_menu_exp.h"
 
+
 // Private Function Prototypes
-static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt );
-static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val );
+static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant );
+static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, slider_callback_t cb );
+static void generic_slider_event_cb( lv_event_t * e );
+
+void display_brightness_event( int32_t value )
+{
+  LV_LOG_USER("Display Brightness: %d", value);
+}
+
+void display_contrast_event( int32_t value )
+{
+  LV_LOG_USER("Display Contrast: %d", value);
+}
 
 // Public Function Definitions
 void menu_example_1( void )
@@ -18,11 +30,11 @@ void menu_example_1( void )
   lv_obj_t * disp_page = lv_menu_page_create( menu, "Dislay Settings" );
   lv_menu_separator_create( disp_page );
   lv_obj_t * disp_section = lv_menu_section_create( disp_page );
-  create_slider( disp_section, LV_SYMBOL_SETTINGS, "Brightness", 0, 100, 50 );
-  create_slider( disp_section, LV_SYMBOL_SETTINGS, "Contrast", 0, 100, 30 );
+  create_slider( disp_section, LV_SYMBOL_SETTINGS, "Brightness", 0, 100, 50, display_brightness_event );
+  create_slider( disp_section, LV_SYMBOL_SETTINGS, "Contrast", 0, 100, 30, display_contrast_event);
 
   // WiFi Sub Page
-  lv_obj_t * wifi_page = lv_menu_page_create( menu, "WiFi" );
+  lv_obj_t * wifi_page = lv_menu_page_create( menu, "WiFi Settings" );
   lv_menu_separator_create( wifi_page );
   lv_obj_t * wifi_section = lv_menu_section_create( wifi_page );
   lv_obj_t * wifi_label = lv_label_create( wifi_section );
@@ -30,15 +42,19 @@ void menu_example_1( void )
 
   // Create Main Page
   lv_obj_t * main_page = lv_menu_page_create( menu, "Settings" );
-
-  lv_obj_t * btn_disp = lv_menu_cont_create( main_page );
-  lv_obj_t * label = lv_label_create( btn_disp );
-  lv_label_set_text( label, "Display" );
+  // creating sections instead of containers to have better padding and spacing
+  lv_obj_t * btn_disp = lv_menu_section_create( main_page );
+  // alternatively, create_text() can be used
+  create_text( btn_disp, LV_SYMBOL_SETTINGS, "Display", LV_MENU_ITEM_BUILDER_VARIANT_1 );
+  // lv_obj_t * label = lv_label_create( btn_disp );
+  // lv_label_set_text( label, "Display" );
   lv_menu_set_load_page_event( menu, btn_disp, disp_page );
 
-  lv_obj_t * btn_wifi = lv_menu_cont_create( main_page );
-  lv_obj_t * lbl_wifi = lv_label_create( btn_wifi );
-  lv_label_set_text(lbl_wifi, "WiFi");
+  // creating sections instead of containers to have better padding and spacing
+  lv_obj_t * btn_wifi = lv_menu_section_create( main_page );
+  create_text( btn_wifi, LV_SYMBOL_WIFI, "WiFi", LV_MENU_ITEM_BUILDER_VARIANT_1 );
+  // lv_obj_t * lbl_wifi = lv_label_create( btn_wifi );
+  // lv_label_set_text(lbl_wifi, "WiFi");
   lv_menu_set_load_page_event( menu, btn_wifi, wifi_page );
 
   // set the page
@@ -47,7 +63,7 @@ void menu_example_1( void )
 }
 
 // Private Function Definitions
-static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt )
+static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant )
 {
   lv_obj_t * obj = lv_menu_cont_create( parent );
   lv_obj_t * img = NULL;
@@ -69,8 +85,9 @@ static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char 
     lv_obj_set_flex_grow( label, 1 );
   }
 
-  // TODO: I don't know why we are doing this. Review later.
-  if ( icon && txt )
+  // if both icon and text are provided, make the icon start a new row and swap their order
+  // so that the text appears first followed by the icon
+  if ( (builder_variant == LV_MENU_ITEM_BUILDER_VARIANT_2) && icon && txt )
   {
     lv_obj_add_flag( img, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );
     lv_obj_swap( img, label );
@@ -79,14 +96,16 @@ static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char 
   return obj;
 }
 
-static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val )
+static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, slider_callback_t cb )
 {
-  lv_obj_t * obj = create_text( parent, icon, txt );
+  lv_obj_t * obj = create_text( parent, icon, txt, LV_MENU_ITEM_BUILDER_VARIANT_2 );
 
   lv_obj_t * slider = lv_slider_create( obj );
   lv_obj_set_flex_grow( slider, 1 );
   lv_slider_set_range( slider, min, max );
   lv_slider_set_value( slider, val, LV_ANIM_OFF );
+
+  lv_obj_add_event_cb( slider, generic_slider_event_cb, LV_EVENT_VALUE_CHANGED, (void *)cb );
 
   // if no icon is provided, make the slider start in a new row
   if ( icon == NULL )
@@ -97,6 +116,22 @@ static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const cha
   return obj;
 }
 
+static void generic_slider_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_VALUE_CHANGED )
+  {
+    // handle value change
+    lv_obj_t * slider = lv_event_get_target( e );
+    int32_t val = lv_slider_get_value( slider );
+    // retrieve the callback function pointer
+    slider_callback_t cb = (slider_callback_t)lv_event_get_user_data( e );
+    if ( cb )
+    {
+      cb( val );
+    }
+  }
+}
 
 // Obsolete function retained for reference
 void menu_exp(void)
@@ -156,6 +191,7 @@ void menu_exp(void)
 
     lv_menu_set_page(menu, main_page);
 }
+
 /*
 
 void menu_exp( void )

@@ -59,7 +59,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLi
     // lv_demo_widgets();
     //char * demo_str[] = {"widgets"};
     //lv_demos_create(demo_str, strlen((char * )demo_str));
-    lv_example_menu_5();
+    // lv_example_menu_5();
     
     // menu_exp();  // onsolete function
     menu_example_1();
