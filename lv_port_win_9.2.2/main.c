@@ -15,6 +15,8 @@
 
 #include "lv_flex_layout_exp.h"
 #include "lv_slider_exp.h"
+#include "lv_menu_exp.h"
+#include "widgets.h"
 
 /*********************
  *      DEFINES
@@ -27,6 +29,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
+static void w_slider_event_cb( lv_event_t * e );
 
 /**********************
  *  STATIC VARIABLES
@@ -56,15 +59,28 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLi
     // lv_demo_widgets();
     //char * demo_str[] = {"widgets"};
     //lv_demos_create(demo_str, strlen((char * )demo_str));
-    // lv_example_menu_5();
-    // menu_exp();
+    lv_example_menu_5();
+    
+    // menu_exp();  // onsolete function
+    menu_example_1();
 
     // Flex Layout Demo Examples
     // flex_layout_exp_1();
     // flex_layout_exp_2();
 
     // Slider Experiments with Flex Layout
-    slider_exp_1();
+    // slider_exp_1();
+
+    // slider widget creation
+    // w_slider_t * my_slider = w_slider_create( lv_screen_active(), 0, 100, 50, w_slider_event_cb );
+    // if( my_slider != NULL )
+    // {
+    //   LV_LOG_USER("Slider widget created successfully");
+    // }
+    // else
+    // {
+    //   LV_LOG_ERROR("Failed to create slider widget");
+    // }
 
     while(1) {
         /* Periodically call the lv_task handler.
@@ -73,4 +89,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLi
         usleep(5000);       /*Just to let the system breath*/
     }
     return 0;
+}
+
+
+static void w_slider_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_VALUE_CHANGED )
+  {
+    lv_obj_t * slider = lv_event_get_target( e );
+    int32_t v = lv_slider_get_value( slider );
+    LV_LOG_USER( "Slider value: %d", v );
+  }
 }
