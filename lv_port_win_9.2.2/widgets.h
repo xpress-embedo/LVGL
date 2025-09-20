@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "lvgl/lvgl.h"
+#include "widget_button.h"
 #include "widget_slider.h"
 
 // Public Function Prototypes
