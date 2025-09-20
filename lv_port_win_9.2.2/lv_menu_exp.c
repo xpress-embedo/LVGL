@@ -8,7 +8,7 @@ lv_obj_t * txt_box_wifi_pswd = NULL;    // object pointer for the text area to e
 // Private Function Prototypes
 static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant );
 static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, slider_callback_t cb );
-// static void create_wifi_settings_page( lv_obj_t * parent );
+static void create_wifi_settings_page( lv_obj_t * parent );
 static void generic_slider_event_cb( lv_event_t * e );
 static void txt_box_wifi_pswd_event_cb( lv_event_t * e );
 static void btn_connect_event_cb( lv_event_t * e );
@@ -146,7 +146,7 @@ static void generic_slider_event_cb( lv_event_t * e )
   }
 }
 
-void create_wifi_settings_page( lv_obj_t * parent )
+static void create_wifi_settings_page( lv_obj_t * parent )
 {
   // create main container
   lv_obj_t * main_cont = lv_obj_create( parent );

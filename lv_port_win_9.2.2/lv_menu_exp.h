@@ -15,6 +15,5 @@ typedef void (*slider_callback_t)( int32_t value );
 
 // Public Function Prototypes
 void menu_example_1( void );
-void create_wifi_settings_page( lv_obj_t * parent );
 
 #endif // LV_MENU_EXP_H_INCLUDED
