@@ -1,10 +1,14 @@
+#include "widgets.h"
 #include "lv_menu_exp.h"
 
+// Private Variables
 
 // Private Function Prototypes
 static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant );
 static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const char * txt, int32_t min, int32_t max, int32_t val, slider_callback_t cb );
+// static void create_wifi_settings_page( lv_obj_t * parent );
 static void generic_slider_event_cb( lv_event_t * e );
+static void txt_box_wifi_pswd_event_cb( lv_event_t * e );
 
 void display_brightness_event( int32_t value )
 {
@@ -35,10 +39,11 @@ void menu_example_1( void )
 
   // WiFi Sub Page
   lv_obj_t * wifi_page = lv_menu_page_create( menu, "WiFi Settings" );
-  lv_menu_separator_create( wifi_page );
-  lv_obj_t * wifi_section = lv_menu_section_create( wifi_page );
-  lv_obj_t * wifi_label = lv_label_create( wifi_section );
-  lv_label_set_text( wifi_label, "WiFi Setting Coming Soon..." );
+  create_wifi_settings_page( wifi_page );
+  // lv_menu_separator_create( wifi_page );
+  // lv_obj_t * wifi_section = lv_menu_section_create( wifi_page );
+  // lv_obj_t * wifi_label = lv_label_create( wifi_section );
+  // lv_label_set_text( wifi_label, "WiFi Setting Coming Soon..." );
 
   // Create Main Page
   lv_obj_t * main_page = lv_menu_page_create( menu, "Settings" );
@@ -58,8 +63,8 @@ void menu_example_1( void )
   lv_menu_set_load_page_event( menu, btn_wifi, wifi_page );
 
   // set the page
-  lv_menu_set_page(menu, main_page);
-  // lv_menu_set_sidebar_page( menu, main_page );
+  // lv_menu_set_page(menu, main_page);
+  lv_menu_set_sidebar_page( menu, main_page );
 }
 
 // Private Function Definitions
@@ -133,6 +138,122 @@ static void generic_slider_event_cb( lv_event_t * e )
   }
 }
 
+void create_wifi_settings_page( lv_obj_t * parent )
+{
+  // create main container
+  lv_obj_t * main_cont = lv_obj_create( parent );
+  // remove default styles
+  lv_obj_remove_style_all( main_cont );
+  lv_obj_set_width( main_cont, LV_PCT(100) );
+  lv_obj_set_height( main_cont, LV_PCT(100) );
+  lv_obj_set_align( main_cont, LV_ALIGN_CENTER );
+  lv_obj_set_flex_flow( main_cont, LV_FLEX_FLOW_COLUMN );
+  lv_obj_set_flex_align( main_cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER );
+  lv_obj_remove_flag( main_cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
+  lv_obj_set_style_pad_left( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_right( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_top( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_bottom( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
+
+  // create 4 containers inside main container
+  // 1. WiFi SSID Text and WiFi List
+  lv_obj_t * cont_ssid = lv_obj_create( main_cont );
+  lv_obj_remove_style_all( cont_ssid );
+  lv_obj_set_width( cont_ssid, LV_PCT(100) );
+  lv_obj_set_height( cont_ssid, LV_PCT(20) );
+  lv_obj_set_align( cont_ssid, LV_ALIGN_TOP_MID );
+  lv_obj_set_flex_flow( cont_ssid, LV_FLEX_FLOW_ROW_WRAP );
+  lv_obj_set_flex_align( cont_ssid, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY );
+  lv_obj_remove_flag( cont_ssid, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
+
+  lv_obj_t * lbl_wifi = lv_label_create( cont_ssid );
+  lv_obj_set_width( lbl_wifi, LV_SIZE_CONTENT );
+  lv_obj_set_height( lbl_wifi, LV_SIZE_CONTENT );
+  lv_obj_set_align( lbl_wifi, LV_ALIGN_CENTER );
+  lv_label_set_text( lbl_wifi, "WiFi SSID" );
+  lv_obj_set_style_text_font( lbl_wifi, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+
+  lv_obj_t * cb_wifi = lv_dropdown_create( cont_ssid );
+  lv_dropdown_set_options( cb_wifi, "FIRST\nSECOND\nGROUND\nFIRST_EXT\n" );
+  lv_obj_set_width( cb_wifi, 250 );
+  lv_obj_set_height( cb_wifi, 50 );
+  lv_obj_set_align( cb_wifi, LV_ALIGN_CENTER );
+  lv_obj_add_flag( cb_wifi, LV_OBJ_FLAG_SCROLL_ON_FOCUS );
+  lv_obj_set_style_text_font( cb_wifi, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+
+  // 2. WiFi Password Test and Password Input
+  lv_obj_t * cont_pswd = lv_obj_create( main_cont );
+  lv_obj_remove_style_all( cont_pswd );
+  lv_obj_set_width( cont_pswd, LV_PCT(100) );
+  lv_obj_set_height( cont_pswd, LV_PCT(20) );
+  lv_obj_set_align( cont_pswd, LV_ALIGN_TOP_MID );
+  lv_obj_set_flex_flow( cont_pswd, LV_FLEX_FLOW_ROW_WRAP );
+  lv_obj_set_flex_align( cont_pswd, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY );
+  lv_obj_remove_flag( cont_pswd, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
+
+  lv_obj_t * lbl_wifi_pswd = lv_label_create( cont_pswd );
+  lv_obj_set_width( lbl_wifi_pswd, LV_SIZE_CONTENT );
+  lv_obj_set_height( lbl_wifi_pswd, LV_SIZE_CONTENT );
+  lv_obj_set_align( lbl_wifi_pswd, LV_ALIGN_CENTER );
+  lv_label_set_text( lbl_wifi_pswd, "Password" );
+  lv_obj_set_style_text_font( lbl_wifi_pswd, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+
+  lv_obj_t * txt_box_wifi_pswd = lv_textarea_create( cont_pswd );
+  lv_obj_set_width( txt_box_wifi_pswd, 250 );
+  lv_obj_set_height( txt_box_wifi_pswd, 50 );
+  lv_obj_set_align( txt_box_wifi_pswd, LV_ALIGN_CENTER );
+  lv_textarea_set_placeholder_text( txt_box_wifi_pswd, "Enter Password" );
+
+
+  // 3. Button Row (Connect, Disconnect, Re-Scan)
+  lv_obj_t * cont_btn = lv_obj_create( main_cont );
+  lv_obj_remove_style_all( cont_btn );
+  lv_obj_set_width( cont_btn, LV_PCT(100) );
+  lv_obj_set_height( cont_btn, LV_PCT(20) );
+  lv_obj_set_align( cont_btn, LV_ALIGN_TOP_MID );
+  lv_obj_set_flex_flow( cont_btn, LV_FLEX_FLOW_ROW_WRAP );
+  lv_obj_set_flex_align( cont_btn, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY );
+  lv_obj_remove_flag( cont_btn, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
+
+  w_button_t * connect_btn = w_button_create( cont_btn, "Connect", NULL );
+  w_button_t * disconnect_btn = w_button_create( cont_btn, "Disconnect", NULL );
+  w_button_t * rescan_btn = w_button_create( cont_btn, "Re Scan", NULL );
+
+  // 4. Keyboard (hidden by default, shown when text area is focused)
+  lv_obj_t * kb_wifi_pswd = lv_keyboard_create( main_cont );
+  lv_obj_set_width( kb_wifi_pswd, LV_PCT(100) );
+  lv_obj_set_height( kb_wifi_pswd, LV_PCT(40) );
+  lv_obj_set_align( kb_wifi_pswd, LV_ALIGN_CENTER );
+
+  // Assign a Text Area to the Keyboard. The pressed characters will be put there.
+  lv_keyboard_set_textarea( kb_wifi_pswd, txt_box_wifi_pswd );
+  // lv_obj_add_event_cb( txt_box_wifi_pswd, txt_box_wifi_pswd_event_cb, LV_EVENT_ALL, NULL );
+  // Hide the keyboard by default
+  // lv_obj_add_flag( kb_wifi_pswd, LV_OBJ_FLAG_HIDDEN );
+}
+
+static void txt_box_wifi_pswd_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  lv_obj_t * target = lv_event_get_target( e );
+  switch ( code )
+  {
+  case LV_EVENT_FOCUSED:
+  case LV_EVENT_CLICKED:
+    // show the keyboard
+    lv_obj_remove_flag( lv_keyboard_get_textarea( target ), LV_OBJ_FLAG_HIDDEN );
+    break;
+  case LV_EVENT_DEFOCUSED:
+  case LV_EVENT_READY:
+    // hide the keyboard
+    lv_obj_add_flag( lv_keyboard_get_textarea( target ), LV_OBJ_FLAG_HIDDEN );
+    break;  
+  default:
+    break;
+  }
+}
+
+/*
 // Obsolete function retained for reference
 void menu_exp(void)
 {
@@ -164,7 +285,7 @@ void menu_exp(void)
     lv_obj_set_layout(slider_row, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(slider_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(slider_row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
-    lv_obj_clear_flag(slider_row, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_remove_flag(slider_row, LV_OBJ_FLAG_SCROLLABLE);
 
     // Slider (2/3 of container width)
     lv_coord_t slider_width = (2 * lv_obj_get_width(container)) / 3;
@@ -189,10 +310,10 @@ void menu_exp(void)
     label = lv_label_create(main_container);
     lv_label_set_text(label, "WiFi");
 
-    lv_menu_set_page(menu, main_page);
+    // set the page
+    // lv_menu_set_page(menu, main_page);
+    lv_menu_set_sidebar_page( menu, main_page );
 }
-
-/*
 
 void menu_exp( void )
 {

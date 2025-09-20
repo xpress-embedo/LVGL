@@ -59,6 +59,7 @@
 		<Unit filename="lv_menu_exp.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="lv_menu_exp.h" />
 		<Unit filename="lv_slider_exp.c">
 			<Option compilerVar="CC" />
 		</Unit>
