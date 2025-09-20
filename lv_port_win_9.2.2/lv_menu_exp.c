@@ -2,7 +2,8 @@
 #include "lv_menu_exp.h"
 
 // Private Variables
-lv_obj_t * kb_wifi_pswd = NULL;     // object pointer for the keyboard
+lv_obj_t * kb_wifi_pswd = NULL;         // object pointer for the keyboard
+lv_obj_t * txt_box_wifi_pswd = NULL;    // object pointer for the text area to enter WiFi password
 
 // Private Function Prototypes
 static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant );
@@ -10,18 +11,24 @@ static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const cha
 // static void create_wifi_settings_page( lv_obj_t * parent );
 static void generic_slider_event_cb( lv_event_t * e );
 static void txt_box_wifi_pswd_event_cb( lv_event_t * e );
-
-void display_brightness_event( int32_t value )
-{
-  LV_LOG_USER("Display Brightness: %d", value);
-}
-
-void display_contrast_event( int32_t value )
-{
-  LV_LOG_USER("Display Contrast: %d", value);
-}
+static void btn_connect_event_cb( lv_event_t * e );
+static void btn_disconnect_event_cb( lv_event_t * e );
+static void btn_rescan_event_cb( lv_event_t * e );
+static void check_box_show_pswd_event_cb( lv_event_t * e );
+static void display_brightness_event( int32_t value );
+static void display_contrast_event( int32_t value );
 
 // Public Function Definitions
+/**
+ * Creates and displays a comprehensive menu on the LVGL interface.
+ *
+ * This function initializes a menu that allows users to control display settings
+ * such as brightness and contrast, as well as select and switch between available WiFi networks.
+ * It demonstrates how to set up menu components, add interactive items for display control,
+ * and provide options for WiFi connectivity management.
+ *
+ * @param none
+ */
 void menu_example_1( void )
 {
   lv_obj_t * menu = lv_menu_create( lv_screen_active() );
@@ -151,10 +158,10 @@ void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_flex_flow( main_cont, LV_FLEX_FLOW_COLUMN );
   lv_obj_set_flex_align( main_cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER );
   lv_obj_remove_flag( main_cont, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
-  lv_obj_set_style_pad_left( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
-  lv_obj_set_style_pad_right( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
-  lv_obj_set_style_pad_top( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
-  lv_obj_set_style_pad_bottom( main_cont, 10, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_left( main_cont, 5, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_right( main_cont, 5, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_top( main_cont, 5, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_pad_bottom( main_cont, 5, LV_PART_MAIN | LV_STATE_DEFAULT );
 
   // create 4 containers inside main container
   // 1. WiFi SSID Text and WiFi List
@@ -199,12 +206,32 @@ void create_wifi_settings_page( lv_obj_t * parent )
   lv_label_set_text( lbl_wifi_pswd, "Password" );
   lv_obj_set_style_text_font( lbl_wifi_pswd, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
 
-  lv_obj_t * txt_box_wifi_pswd = lv_textarea_create( cont_pswd );
+  txt_box_wifi_pswd = lv_textarea_create( cont_pswd );
   lv_obj_set_width( txt_box_wifi_pswd, 250 );
   lv_obj_set_height( txt_box_wifi_pswd, 50 );
   lv_obj_set_align( txt_box_wifi_pswd, LV_ALIGN_CENTER );
   lv_textarea_set_placeholder_text( txt_box_wifi_pswd, "Enter Password" );
   lv_textarea_set_password_mode( txt_box_wifi_pswd, true );
+
+  lv_obj_t * check_box_show_pswd = lv_checkbox_create( cont_pswd );
+  lv_checkbox_set_text( check_box_show_pswd, "Show Password" );
+  lv_obj_set_width( check_box_show_pswd, LV_SIZE_CONTENT );
+  lv_obj_set_height( check_box_show_pswd, LV_SIZE_CONTENT );
+  lv_obj_set_align( check_box_show_pswd, LV_ALIGN_CENTER );
+  // we may need to tune this again, based on the display size
+  lv_obj_set_x( check_box_show_pswd, 10 );
+  lv_obj_set_y( check_box_show_pswd, 35 );
+  // here the flag LV_OBJ_FLAG_IGNORE_LAYOUT is added to avoid the checkbox being squished in the flex layout
+  // else whole layout will be broken
+  lv_obj_add_flag( check_box_show_pswd, LV_OBJ_FLAG_IGNORE_LAYOUT | LV_OBJ_FLAG_OVERFLOW_VISIBLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS );
+  lv_obj_set_style_text_font( check_box_show_pswd, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_border_color( check_box_show_pswd, lv_color_hex(0x808080), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+  lv_obj_set_style_border_color( check_box_show_pswd, lv_color_hex(0x808080), LV_PART_INDICATOR | LV_STATE_CHECKED );
+  lv_obj_set_style_bg_color( check_box_show_pswd, lv_color_hex(0x808080), LV_PART_INDICATOR | LV_STATE_CHECKED );
+  lv_obj_set_style_border_opa( check_box_show_pswd, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT );
+
+  // add event callback to the checkbox
+  lv_obj_add_event_cb( check_box_show_pswd, check_box_show_pswd_event_cb, LV_EVENT_ALL, NULL );
 
   // 3. Button Row (Connect, Disconnect, Re-Scan)
   lv_obj_t * cont_btn = lv_obj_create( main_cont );
@@ -220,9 +247,9 @@ void create_wifi_settings_page( lv_obj_t * parent )
   // w_button_t * disconnect_btn = w_button_create( cont_btn, "Disconnect", NULL );
   // w_button_t * rescan_btn = w_button_create( cont_btn, "Re Scan", NULL );
   // NOTE: using the below lines to avoid warnings
-  w_button_create( cont_btn, "Connect", NULL );
-  w_button_create( cont_btn, "Disconnect", NULL );
-  w_button_create( cont_btn, "Re Scan", NULL );
+  w_button_create( cont_btn, "Connect", btn_connect_event_cb );
+  w_button_create( cont_btn, "Disconnect", btn_disconnect_event_cb );
+  w_button_create( cont_btn, "Re Scan", btn_rescan_event_cb );
 
   // 4. Keyboard (hidden by default, shown when text area is focused)
   kb_wifi_pswd = lv_keyboard_create( main_cont );
@@ -262,6 +289,64 @@ static void txt_box_wifi_pswd_event_cb( lv_event_t * e )
   default:
     break;
   }
+}
+
+static void btn_connect_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_CLICKED )
+  {
+    // lv_obj_t * btn = lv_event_get_target( e );
+    LV_LOG_USER( "Connect Button Clicked" );
+    // handle connect button click
+  }
+}
+
+static void btn_disconnect_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_CLICKED )
+  {
+    // lv_obj_t * btn = lv_event_get_target( e );
+    LV_LOG_USER( "Disconnect Button Clicked" );
+    // handle disconnect button click
+  }
+}
+
+static void btn_rescan_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_CLICKED )
+  {
+    // lv_obj_t * btn = lv_event_get_target( e );
+    LV_LOG_USER( "Re-Scan Button Clicked" );
+    // handle re-scan button click
+  }
+}
+
+static void check_box_show_pswd_event_cb( lv_event_t * e )
+{
+  lv_event_code_t code = lv_event_get_code( e );
+  if ( code == LV_EVENT_VALUE_CHANGED )
+  {
+    lv_obj_t * cb = lv_event_get_target( e );
+    bool checked = lv_obj_has_state( cb, LV_STATE_CHECKED );
+    LV_LOG_USER( "Show Password Checkbox: %s", checked ? "Checked" : "Unchecked" );
+    if ( txt_box_wifi_pswd != NULL )
+    {
+      lv_textarea_set_password_mode( txt_box_wifi_pswd, !checked );
+    }
+  }
+}
+
+static void display_brightness_event( int32_t value )
+{
+  LV_LOG_USER("Display Brightness: %d", value);
+}
+
+static void display_contrast_event( int32_t value )
+{
+  LV_LOG_USER("Display Contrast: %d", value);
 }
 
 /*
