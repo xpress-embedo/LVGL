@@ -118,6 +118,16 @@ static lv_obj_t * create_slider( lv_obj_t * parent, const char * icon, const cha
   lv_slider_set_range( slider, min, max );
   lv_slider_set_value( slider, val, LV_ANIM_OFF );
 
+  lv_obj_set_style_radius( slider, 0, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_bg_color( slider, lv_color_hex(0xD3D3D3), LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_bg_opa( slider, 255, LV_PART_MAIN | LV_STATE_DEFAULT );
+
+  lv_obj_set_style_bg_color( slider, lv_color_hex(0x696969), LV_PART_INDICATOR | LV_STATE_DEFAULT );
+  lv_obj_set_style_bg_opa( slider, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT );
+
+  lv_obj_set_style_bg_color( slider, lv_color_hex(0x708090), LV_PART_KNOB | LV_STATE_DEFAULT );
+  lv_obj_set_style_bg_opa( slider, 255, LV_PART_KNOB | LV_STATE_DEFAULT );
+
   lv_obj_add_event_cb( slider, generic_slider_event_cb, LV_EVENT_VALUE_CHANGED, (void *)cb );
 
   // if no icon is provided, make the slider start in a new row
@@ -179,7 +189,7 @@ static void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_height( lbl_wifi, LV_SIZE_CONTENT );
   lv_obj_set_align( lbl_wifi, LV_ALIGN_CENTER );
   lv_label_set_text( lbl_wifi, "WiFi SSID" );
-  lv_obj_set_style_text_font( lbl_wifi, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_text_font( lbl_wifi, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT );
 
   lv_obj_t * cb_wifi = lv_dropdown_create( cont_ssid );
   lv_dropdown_set_options( cb_wifi, "FIRST\nSECOND\nGROUND\nFIRST_EXT\n" );
@@ -187,7 +197,7 @@ static void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_height( cb_wifi, 50 );
   lv_obj_set_align( cb_wifi, LV_ALIGN_CENTER );
   lv_obj_add_flag( cb_wifi, LV_OBJ_FLAG_SCROLL_ON_FOCUS );
-  lv_obj_set_style_text_font( cb_wifi, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_text_font( cb_wifi, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT );
 
   // 2. WiFi Password Test and Password Input
   lv_obj_t * cont_pswd = lv_obj_create( main_cont );
@@ -204,7 +214,7 @@ static void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_height( lbl_wifi_pswd, LV_SIZE_CONTENT );
   lv_obj_set_align( lbl_wifi_pswd, LV_ALIGN_CENTER );
   lv_label_set_text( lbl_wifi_pswd, "Password" );
-  lv_obj_set_style_text_font( lbl_wifi_pswd, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT );
+  lv_obj_set_style_text_font( lbl_wifi_pswd, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT );
 
   txt_box_wifi_pswd = lv_textarea_create( cont_pswd );
   lv_obj_set_width( txt_box_wifi_pswd, 250 );
