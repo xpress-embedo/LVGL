@@ -2,6 +2,7 @@
 #include "lv_menu_exp.h"
 
 // Private Variables
+lv_obj_t * kb_wifi_pswd = NULL;     // object pointer for the keyboard
 
 // Private Function Prototypes
 static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant );
@@ -97,7 +98,7 @@ static lv_obj_t * create_text( lv_obj_t * parent, const char * icon, const char 
     lv_obj_add_flag( img, LV_OBJ_FLAG_FLEX_IN_NEW_TRACK );
     lv_obj_swap( img, label );
   }
-  
+
   return obj;
 }
 
@@ -203,7 +204,7 @@ void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_height( txt_box_wifi_pswd, 50 );
   lv_obj_set_align( txt_box_wifi_pswd, LV_ALIGN_CENTER );
   lv_textarea_set_placeholder_text( txt_box_wifi_pswd, "Enter Password" );
-
+  lv_textarea_set_password_mode( txt_box_wifi_pswd, true );
 
   // 3. Button Row (Connect, Disconnect, Re-Scan)
   lv_obj_t * cont_btn = lv_obj_create( main_cont );
@@ -215,21 +216,25 @@ void create_wifi_settings_page( lv_obj_t * parent )
   lv_obj_set_flex_align( cont_btn, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_EVENLY );
   lv_obj_remove_flag( cont_btn, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );
 
-  w_button_t * connect_btn = w_button_create( cont_btn, "Connect", NULL );
-  w_button_t * disconnect_btn = w_button_create( cont_btn, "Disconnect", NULL );
-  w_button_t * rescan_btn = w_button_create( cont_btn, "Re Scan", NULL );
+  // w_button_t * connect_btn = w_button_create( cont_btn, "Connect", NULL );
+  // w_button_t * disconnect_btn = w_button_create( cont_btn, "Disconnect", NULL );
+  // w_button_t * rescan_btn = w_button_create( cont_btn, "Re Scan", NULL );
+  // NOTE: using the below lines to avoid warnings
+  w_button_create( cont_btn, "Connect", NULL );
+  w_button_create( cont_btn, "Disconnect", NULL );
+  w_button_create( cont_btn, "Re Scan", NULL );
 
   // 4. Keyboard (hidden by default, shown when text area is focused)
-  lv_obj_t * kb_wifi_pswd = lv_keyboard_create( main_cont );
+  kb_wifi_pswd = lv_keyboard_create( main_cont );
   lv_obj_set_width( kb_wifi_pswd, LV_PCT(100) );
   lv_obj_set_height( kb_wifi_pswd, LV_PCT(40) );
   lv_obj_set_align( kb_wifi_pswd, LV_ALIGN_CENTER );
 
   // Assign a Text Area to the Keyboard. The pressed characters will be put there.
   lv_keyboard_set_textarea( kb_wifi_pswd, txt_box_wifi_pswd );
-  // lv_obj_add_event_cb( txt_box_wifi_pswd, txt_box_wifi_pswd_event_cb, LV_EVENT_ALL, NULL );
+  lv_obj_add_event_cb( txt_box_wifi_pswd, txt_box_wifi_pswd_event_cb, LV_EVENT_ALL, NULL );
   // Hide the keyboard by default
-  // lv_obj_add_flag( kb_wifi_pswd, LV_OBJ_FLAG_HIDDEN );
+  lv_obj_add_flag( kb_wifi_pswd, LV_OBJ_FLAG_HIDDEN );
 }
 
 static void txt_box_wifi_pswd_event_cb( lv_event_t * e )
@@ -241,13 +246,19 @@ static void txt_box_wifi_pswd_event_cb( lv_event_t * e )
   case LV_EVENT_FOCUSED:
   case LV_EVENT_CLICKED:
     // show the keyboard
-    lv_obj_remove_flag( lv_keyboard_get_textarea( target ), LV_OBJ_FLAG_HIDDEN );
+    LV_LOG_USER( "Text Area Focused/Clicked" );
+    // link the keyboard to the text area (in case not already done)
+    lv_keyboard_set_textarea( kb_wifi_pswd, target );
+    lv_obj_remove_flag( kb_wifi_pswd, LV_OBJ_FLAG_HIDDEN );
     break;
   case LV_EVENT_DEFOCUSED:
   case LV_EVENT_READY:
     // hide the keyboard
-    lv_obj_add_flag( lv_keyboard_get_textarea( target ), LV_OBJ_FLAG_HIDDEN );
-    break;  
+    LV_LOG_USER( "Text Area Defocused/Ready" );
+    // Unlink the keyboard from the text area to avoid further input
+    lv_keyboard_set_textarea( kb_wifi_pswd, NULL );
+    lv_obj_add_flag( kb_wifi_pswd, LV_OBJ_FLAG_HIDDEN );
+    break;
   default:
     break;
   }
